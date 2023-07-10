@@ -16,8 +16,18 @@ const (
 	INT   = "INT"   // 1343456
 
 	// Operators
-	ASSIGN = "="
-	PLUS   = "+"
+	ASSIGN   = "="
+	PLUS     = "+"
+	MINUS    = "-"
+	BANG     = "!"
+	ASTERISK = "*"
+	SLASH    = "/"
+
+	LT = "<"
+	GT = ">"
+
+	EQ     = "=="
+	NOT_EQ = "!="
 
 	// Delimiters
 	COMMA     = ","
@@ -31,15 +41,25 @@ const (
 	// Keywords
 	FUNCTION = "FUNCTION"
 	LET      = "LET"
+	TRUE     = "TRUE"
+	FALSE    = "FALSE"
+	IF       = "IF"
+	ELSE     = "ELSE"
+	RETURN   = "RETURN"
 )
 
 var keywords = map[string]TokenType{
-	"fn":  FUNCTION,
-	"let": LET,
+	"fn":     FUNCTION,
+	"let":    LET,
+	"true":   TRUE,
+	"false":  FALSE,
+	"if":     IF,
+	"else":   ELSE,
+	"return": RETURN,
 }
 
-// LookupIdent checks the keywords table to see whether the given identifier is in fact a keyword. 
-// If it is, it returns the keyword's TokenType constant. 
+// LookupIdent checks the keywords table to see whether the given identifier is in fact a keyword.
+// If it is, it returns the keyword's TokenType constant.
 // If it isn't, it assumes we're dealing with a user-defined identifier and returns the IDENT token type.
 func LookupIdent(ident string) TokenType {
 	if tok, ok := keywords[ident]; ok {

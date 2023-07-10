@@ -1,6 +1,8 @@
 package lexer
 
 import (
+	"fmt"
+
 	"github.com/MartiinWalsh/interpreter-in-go/token"
 )
 
@@ -38,10 +40,36 @@ func (l *Lexer) NextToken() token.Token {
 	l.skipWhitespace()
 
 	switch l.ch {
-	case '=':
-		tok = newToken(token.ASSIGN, l.ch)
+	case '-':
+		tok = newToken(token.MINUS, l.ch)
+	case '!':
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			literal := string(ch) + string(l.ch)
+			tok = token.Token{Type: token.NOT_EQ, Literal: literal}
+		} else {
+			tok = newToken(token.BANG, l.ch)
+		}
+	case '/':
+		tok = newToken(token.SLASH, l.ch)
+	case '*':
+		tok = newToken(token.ASTERISK, l.ch)
+	case '<':
+		tok = newToken(token.LT, l.ch)
+	case '>':
+		tok = newToken(token.GT, l.ch)
 	case ';':
 		tok = newToken(token.SEMICOLON, l.ch)
+	case '=':
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			literal := string(l.ch) + string(ch)
+			tok = token.Token{Type: token.EQ, Literal: literal}
+		} else {
+			tok = newToken(token.ASSIGN, l.ch)
+		}
 	case '(':
 		tok = newToken(token.LPAREN, l.ch)
 	case ')':
@@ -61,16 +89,20 @@ func (l *Lexer) NextToken() token.Token {
 		if isLetter(l.ch) {
 			tok.Literal = l.readIdentifier()
 			tok.Type = token.LookupIdent(tok.Literal)
+			fmt.Println(tok)
 			return tok
 		} else if isDigit(l.ch) {
-            tok.Type = token.INT
-            tok.Literal = l.readNumber()
-            return tok
-        } else {
+			tok.Type = token.INT
+			tok.Literal = l.readNumber()
+			fmt.Println(tok)
+			return tok
+		} else {
 			tok = newToken(token.ILLEGAL, l.ch)
 		}
 	}
 	l.readChar()
+
+	fmt.Println(tok)
 	return tok
 }
 
@@ -94,15 +126,25 @@ func (l *Lexer) skipWhitespace() {
 }
 
 func (l *Lexer) readNumber() string {
-    position := l.position
-    for isDigit(l.ch) {
-        l.readChar()
-    }
-    return l.input[position:l.position]
+	position := l.position
+	for isDigit(l.ch) {
+		l.readChar()
+	}
+	return l.input[position:l.position]
 }
 
 func isDigit(ch byte) bool {
-    return '0' <= ch && ch <= '9'
+	return '0' <= ch && ch <= '9'
+}
+
+func (l *Lexer) peekChar() byte {
+	// Check if we've reached the end of the input string
+	if l.readPosition >= len(l.input) {
+		return 0 // ASCII code for "NUL" character, signifies "end of file"
+	} else {
+		// Otherwise, set the current character to the next character in the input string
+		return l.input[l.readPosition]
+	}
 }
 
 // Helper function to create a new token
